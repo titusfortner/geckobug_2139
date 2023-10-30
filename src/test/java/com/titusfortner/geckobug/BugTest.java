@@ -2,6 +2,7 @@ package com.titusfortner.geckobug;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -13,40 +14,89 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.GeckoDriverService;
 
 public class BugTest {
-  WebDriver driver;
-  String PASSING_VERSION = "119";
-  String FAILING_VERSION = "120";
+    WebDriver driver;
+    String PASSING_VERSION = "119";
+    String FAILING_VERSION = "120";
 
-  @AfterEach
-  public void tearDown() {
-    if (driver != null) {
-      driver.quit();
+    @AfterEach
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+        }
     }
-  }
 
-  @Test
-  public void internationalization() {
-    FirefoxOptions options = new FirefoxOptions();
-    options.setBrowserVersion(FAILING_VERSION);
-    FirefoxDriverService service =
-        new GeckoDriverService.Builder()
-            .withLogLevel(FirefoxDriverLogLevel.TRACE)
-            .withLogOutput(System.out)
-            .build();
-    driver = new FirefoxDriver(service, options);
+    @Test
+    public void internationalization() {
+        FirefoxOptions options = new FirefoxOptions();
+        options.setBrowserVersion(FAILING_VERSION);
 
-    driver.get("https://www.selenium.dev/selenium/web/cn-test.html");
+        FirefoxDriverService service =
+            new GeckoDriverService.Builder()
+                .withLogLevel(FirefoxDriverLogLevel.TRACE)
+                .withLogOutput(System.out)
+                .build();
 
-    String input = "";
-    input += new String(Character.toChars(0x20000));
-    input += new String(Character.toChars(0x2070E));
-    input += new String(Character.toChars(0x2000B));
-    input += new String(Character.toChars(0x2A190));
-    input += new String(Character.toChars(0x2A6B2));
+        driver = new FirefoxDriver(service, options);
 
-    WebElement el = driver.findElement(By.name("i18n"));
-    el.sendKeys(input);
+        driver.get("https://www.selenium.dev/selenium/web/cn-test.html");
 
-    Assertions.assertEquals(input, el.getDomProperty("value"));
-  }
+        String input = "";
+        input += new String(Character.toChars(0x20000));
+        input += new String(Character.toChars(0x2070E));
+        input += new String(Character.toChars(0x2000B));
+        input += new String(Character.toChars(0x2A190));
+        input += new String(Character.toChars(0x2A6B2));
+
+        WebElement el = driver.findElement(By.name("i18n"));
+        el.sendKeys(input);
+
+        Assertions.assertEquals(input, el.getDomProperty("value"));
+    }
+
+    @Test
+    @DisplayName("Test Empty Input")
+    public void testEmptyInput() {
+        FirefoxOptions options = new FirefoxOptions();
+        options.setBrowserVersion(PASSING_VERSION);
+
+        FirefoxDriverService service =
+            new GeckoDriverService.Builder()
+                .withLogLevel(FirefoxDriverLogLevel.TRACE)
+                .withLogOutput(System.out)
+                .build();
+
+        driver = new FirefoxDriver(service, options);
+
+        driver.get("https://www.selenium.dev/selenium/web/cn-test.html");
+
+        WebElement el = driver.findElement(By.name("i18n"));
+        el.sendKeys("");
+
+        Assertions.assertEquals("", el.getDomProperty("value"));
+    }
+
+    @Test
+    @DisplayName("Test Non-ASCII Characters")
+    public void testNonAsciiCharacters() {
+        FirefoxOptions options = new FirefoxOptions();
+        options.setBrowserVersion(PASSING_VERSION);
+
+        FirefoxDriverService service =
+            new GeckoDriverService.Builder()
+                .withLogLevel(FirefoxDriverLogLevel.TRACE)
+                .withLogOutput(System.out)
+                .build();
+
+        driver = new FirefoxDriver(service, options);
+
+        driver.get("https://www.selenium.dev/selenium/web/cn-test.html");
+
+        String input = "\u041f\u0440\u0438\u0432\u0435\u0442"; // Example: Cyrillic characters
+
+        WebElement el = driver.findElement(By.name("i18n"));
+        el.sendKeys(input);
+
+        Assertions.assertEquals(input, el.getDomProperty("value"));
+    }
 }
+
